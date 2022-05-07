@@ -1,0 +1,48 @@
+version: "3.7"
+services:
+  blenderbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '<__PORT__>:5000'
+    environment:
+      DB_MESSAGES: "postgresql://<__USER__>:<__PASSWORD__>@<__IP__>:<__PORT__>/<__DB__>"
+      REDIS_CONNECT: "redis://<__USER__>:<__PASSWORD__>@<__IP__>:<__PORT__>"
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:5000/ping" ]
+      interval: 10s
+      timeout: 1s
+      retries: 5
+      start_period: 200s
+    restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.9'
+          memory: 3G
+          # 3 Gigabytes is the minimum amount, because during the peak load (when processing one array of messages)
+          # there is a "jump" from the working 1.5 gigabytes to 1.8 gigabytes
+        reservations:
+          cpus: '0.2'
+          memory: 2G
+  demon:
+    build:
+      context: .
+      dockerfile: Dockerfile_demon
+    environment:
+      DB_MESSAGES: "postgresql://<__USER__>:<__PASSWORD__>@<__IP__>:<__PORT__>/<__DB__>"
+      API: "http://blenderbot:<__PORT__>/"
+    restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 50M
+        reservations:
+          cpus: '0.1'
+          memory: 30M

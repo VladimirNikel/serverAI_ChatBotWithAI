@@ -1,0 +1,10 @@
+/.git
+/.idea
+/venv
+start_local.sh
+/redis*
+/docker-compose_blenderbot_local.yml
+/Dockerfile_local
+/docker-compose_redis_local.yml
+/main_server.py
+/new.py

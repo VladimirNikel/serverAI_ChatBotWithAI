@@ -1,0 +1,26 @@
+version: "3.7"
+services:
+  redis:
+    image: "redis:4-alpine3.10"
+    command: redis-server --requirepass <__PASSWORD__>
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
+      - ./redis-conf:/usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 500M
